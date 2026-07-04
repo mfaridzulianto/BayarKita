@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BayarKita – Bayar Tagihan & Top-Up Terpercaya</title>
+  <meta name="description"
+    content="BayarKita – Aplikasi pembayaran tagihan listrik, PDAM, internet, SPP kuliah, dan isi pulsa secara mudah dan cepat." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div id="toast-container" role="alert" aria-live="polite"></div>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" role="navigation" aria-label="Navigasi utama">
+    <div class="navbar-brand">
+      <div
+        style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0D9488,#10B981);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1rem;">
+        BK</div>
+      <span>BayarKita</span>
+    </div>
+    <nav class="navbar-nav" id="navbar-nav" role="menubar">
+      <a href="#" class="nav-link active" data-section="dashboard" role="menuitem" id="nav-dashboard"><i
+          class="fas fa-home"></i> Beranda</a>
+      <a href="#" class="nav-link" data-section="tagihan" role="menuitem" id="nav-tagihan"><i
+          class="fas fa-file-invoice-dollar"></i> Bayar Tagihan</a>
+      <a href="#" class="nav-link" data-section="spp" role="menuitem" id="nav-spp"><i class="fas fa-graduation-cap"></i>
+        Biaya Kuliah</a>
+      <a href="#" class="nav-link" data-section="pulsa" role="menuitem" id="nav-pulsa"><i class="fas fa-mobile-alt"></i>
+        Isi Pulsa</a>
+      <a href="#" class="nav-link" data-section="riwayat" role="menuitem" id="nav-riwayat"><i
+          class="fas fa-history"></i> Riwayat</a>
+      <a href="#" class="nav-link" data-section="help" role="menuitem" id="nav-help"><i
+          class="fas fa-question-circle"></i> Bantuan</a>
+    </nav>
+    <div class="navbar-actions">
+      <button class="btn-icon" id="darkmode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode"
+        aria-label="Toggle dark mode">
+        <i class="fas fa-moon" id="darkmode-icon"></i>
+      </button>
+      <button class="btn-icon" id="profile-btn" onclick="navigateTo('profile')" title="Profil"
+        aria-label="Profil pengguna">
+        <i class="fas fa-user"></i>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main>
+
+    <!-- ==========================================
+     SECTION 1: DASHBOARD
+     ========================================== -->
+    <section id="section-dashboard" class="section active" aria-labelledby="dashboard-title">
+      <div class="container">
+        <div class="balance-card card" style="margin-bottom:24px; position:relative;">
+          <div class="balance-label"><i class="fas fa-wallet"></i> Saldo BayarKita</div>
+          <div class="balance-amount" id="display-balance">Rp 5.000.000</div>
+          <div class="balance-note">Saldo dapat digunakan untuk semua layanan</div>
+          <button class="balance-refresh" onclick="refreshBalance()" aria-label="Refresh saldo" title="Refresh">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+
+        <div class="promo-banner">
+          <div>
+            <h3>🎉 Promo Cashback 10%</h3>
+            <p>Bayar tagihan PLN bulan ini & dapatkan cashback langsung!</p>
+          </div>
+          <div class="promo-badge">HEMAT 10%</div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val" id="stat-total">0</div>
+            <div class="stat-lbl"><i class="fas fa-receipt"></i> Total Transaksi</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-bulan">Rp 0</div>
+            <div class="stat-lbl"><i class="fas fa-calendar"></i> Pengeluaran Bulan Ini</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-terakhir">—</div>
+            <div class="stat-lbl"><i class="fas fa-clock"></i> Transaksi Terakhir</div>
+          </div>
+        </div>
+
+        <h2 class="section-title" id="dashboard-title">Layanan Kami</h2>
+        <p class="section-subtitle">Pilih layanan yang ingin Anda gunakan</p>
+        <div class="quick-access">
+          <button class="quick-btn" onclick="navigateTo('tagihan','PLN')" aria-label="Bayar Listrik PLN">
+            <div class="icon icon-pln"><i class="fas fa-bolt"></i></div>
+            <div class="label">Listrik PLN</div>
+          </button>
+          <button class="quick-btn" onclick="navigateTo('tagihan','PDAM')" aria-label="Bayar PDAM">
+            <div class="icon icon-pdam"><i class="fas fa-tint"></i></div>
+            <div class="label">PDAM</div>
+          </button>
+          <button class="quick-btn" onclick="navigateTo('tagihan','Internet')" aria-label="Bayar Internet">
+            <div class="icon icon-internet"><i class="fas fa-wifi"></i></div>
+            <div class="label">Internet</div>
+          </button>
+          <button class="quick-btn" onclick="navigateTo('spp')" aria-label="Bayar SPP Kuliah">
+            <div class="icon icon-spp"><i class="fas fa-graduation-cap"></i></div>
+            <div class="label">Biaya Kuliah</div>
+          </button>
+          <button class="quick-btn" onclick="navigateTo('pulsa')" aria-label="Isi Pulsa">
+            <div class="icon icon-pulsa"><i class="fas fa-mobile-alt"></i></div>
+            <div class="label">Isi Pulsa</div>
+          </button>
+          <button class="quick-btn" onclick="navigateTo('tagihan','Seminar')" aria-label="Bayar Seminar">
+            <div class="icon icon-seminar"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div class="label">Seminar</div>
+          </button>
+        </div>
+
+        <h2 class="section-title" style="margin-top:8px;">Transaksi Terbaru</h2>
+        <div id="dashboard-recent" style="margin-top:16px;"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+     SECTION 2: BAYAR TAGIHAN
+     ========================================== -->
+    <section id="section-tagihan" class="section" aria-labelledby="tagihan-title">
+      <div class="container">
+        <h1 class="section-title" id="tagihan-title">Bayar Tagihan</h1>
+        <p class="section-subtitle">Pilih jenis tagihan dan masukkan nomor pelanggan</p>
+
+        <div class="category-tabs" role="tablist" aria-label="Kategori tagihan">
+          <button class="tab-btn active" data-category="PLN" onclick="switchCategory(this,'PLN')" role="tab"
+            aria-selected="true" id="tab-pln">
+            <i class="fas fa-bolt"></i> Listrik PLN
+          </button>
+          <button class="tab-btn" data-category="PDAM" onclick="switchCategory(this,'PDAM')" role="tab" id="tab-pdam">
+            <i class="fas fa-tint"></i> PDAM
+          </button>
+          <button class="tab-btn" data-category="Internet" onclick="switchCategory(this,'Internet')" role="tab"
+            id="tab-internet">
+            <i class="fas fa-wifi"></i> Internet
+          </button>
+          <button class="tab-btn" data-category="Seminar" onclick="switchCategory(this,'Seminar')" role="tab"
+            id="tab-seminar">
+            <i class="fas fa-chalkboard-teacher"></i> Seminar
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="form-group">
+            <label for="customer-number" id="customer-label">Nomor Pelanggan PLN</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="customer-number"
+                placeholder="Masukkan nomor pelanggan (8-12 digit)" aria-labelledby="customer-label"
+                aria-describedby="customer-error" maxlength="20" />
+              <button class="btn btn-primary" id="btn-cek-tagihan" onclick="cekTagihan()" aria-label="Cek tagihan">
+                <i class="fas fa-search"></i> Cek
+              </button>
+            </div>
+            <div class="field-error" id="customer-error" role="alert"></div>
+            <div id="customer-hint" style="font-size:0.78rem;color:var(--text-muted);margin-top:4px;"></div>
+          </div>
+
+          <!-- Bill Result -->
+          <div class="bill-result" id="bill-result">
+            <div id="bill-result-content"></div>
+
+            <!-- Payment Methods -->
+            <div style="margin-top:20px;">
+              <h3 style="font-weight:700;font-size:1rem;margin-bottom:12px;">Metode Pembayaran</h3>
+              <div class="payment-methods" id="payment-methods" role="radiogroup" aria-label="Pilih metode pembayaran">
+                <!-- Dirender via JS -->
+              </div>
+              <div id="payment-detail-area"></div>
+            </div>
+            <button class="btn btn-primary btn-full" id="btn-bayar" onclick="prosesBayar()" style="margin-top:16px;"
+              aria-label="Bayar sekarang">
+              <i class="fas fa-lock"></i> Bayar Sekarang
+            </button>
+          </div>
+        </div>
+
+        <!-- Sample IDs -->
+        <div class="card" style="margin-top:16px;padding:16px 20px;">
+          <p style="font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;">
+            <i class="fas fa-lightbulb"></i> Contoh nomor untuk demo:
+          </p>
+          <div id="sample-ids" style="font-size:0.82rem;color:var(--primary);"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+     SECTION 3: SPP / BIAYA KULIAH
+     ========================================== -->
+    <section id="section-spp" class="section" aria-labelledby="spp-title">
+      <div class="container">
+        <h1 class="section-title" id="spp-title">Biaya Kuliah / SPP</h1>
+        <p class="section-subtitle">Cek dan bayar tagihan kuliah berdasarkan NIM atau Kode Tagihan</p>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="type-tabs" role="tablist">
+            <button class="type-tab active" id="spp-tab-nim" onclick="switchSppTab('nim')" role="tab">Cari via
+              NIM</button>
+            <button class="type-tab" id="spp-tab-code" onclick="switchSppTab('code')" role="tab">Kode Tagihan</button>
+          </div>
+
+          <!-- NIM Tab -->
+          <div id="spp-nim-panel">
+            <div class="form-group">
+              <label for="input-nim">Nomor Induk Mahasiswa (NIM)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="input-nim" placeholder="Masukkan NIM 12 digit"
+                  maxlength="12" aria-describedby="nim-error" />
+                <button class="btn btn-primary" onclick="cekSPP()" id="btn-cek-spp">
+                  <i class="fas fa-search"></i> Cek
+                </button>
+              </div>
+              <div class="field-error" id="nim-error" role="alert"></div>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-muted);">Contoh NIM: <strong>221011402463</strong>,
+              <strong>221011402465</strong>, <strong>221011402467</strong>
+            </p>
+          </div>
+
+          <!-- Kode Tagihan Tab -->
+          <div id="spp-code-panel" style="display:none;">
+            <div class="form-group">
+              <label for="input-billcode">Kode Tagihan (15 digit)</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="input-billcode" placeholder="Masukkan kode tagihan 15 digit"
+                  maxlength="15" aria-describedby="billcode-error" />
+                <button class="btn btn-primary" onclick="cekBillCode()" id="btn-cek-billcode">
+                  <i class="fas fa-search"></i> Cek
+                </button>
+              </div>
+              <div class="field-error" id="billcode-error" role="alert"></div>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-muted);">Contoh Kode: <strong>986248962486438</strong>,
+              <strong>774125963258741</strong>
+            </p>
+          </div>
+        </div>
+
+        <!-- SPP Result -->
+        <div id="spp-result" style="display:none;">
+          <div class="card" style="margin-bottom:16px;">
+            <div class="spp-student-info" id="spp-student-info"></div>
+
+            <div class="spp-controls no-print"
+              style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:16px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <select id="spp-semester-select" class="form-control" style="width:200px; margin:0;"
+                  aria-label="Pilih Semester">
+                  <option value="">Pilih Semester</option>
+                  <option value="20262">GENAP 2026/2027</option>
+                  <option value="20261">GANJIL 2026/2027</option>
+                  <option value="20252">GENAP 2025/2026</option>
+                  <option value="20251">GANJIL 2025/2026</option>
+                  <option value="20242">GENAP 2024/2025</option>
+                  <option value="20241">GANJIL 2024/2025</option>
+                </select>
+                <button class="btn btn-success" onclick="printSppList()"
+                  style="margin:0; background-color:#22c55e; border-color:#22c55e; color:white; font-weight:600;"><i
+                    class="fas fa-print"></i> CETAK</button>
+              </div>
+            </div>
+
+            <h3
+              style="font-size:1.15rem; font-weight:800; color:#3b82f6; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.5px;">
+              Tagihan Semester</h3>
+            <div class="spp-table-wrap">
+              <table class="spp-table" role="table" aria-label="Daftar tagihan SPP">
+                <thead>
+                  <tr>
+                    <th>NO. TAGIHAN</th>
+                    <th>NO. URUT</th>
+                    <th>PEMBAYARAN</th>
+                    <th>JUMLAH BAYAR</th>
+                    <th>CHANEL BAYAR &uarr;</th>
+                    <th>TEMPAT BAYAR</th>
+                    <th>STATUS BAYAR</th>
+                    <th>TANGGAL BAYAR</th>
+                  </tr>
+                </thead>
+                <tbody id="spp-table-body"></tbody>
+              </table>
+            </div>
+            <div class="spp-summary no-print">
+              <div>
+                <div class="spp-summary-label">Total Terpilih</div>
+                <div class="spp-summary-amount" id="spp-total">Rp 0</div>
+              </div>
+              <button class="btn btn-outline" style="background:#fff;border-color:#fff;color:var(--primary);"
+                onclick="openSppPayment()" id="btn-bayar-spp" disabled>
+                <i class="fas fa-credit-card"></i> Lanjut Bayar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+     SECTION 4: ISI PULSA & PAKET
+     ========================================== -->
+    <section id="section-pulsa" class="section" aria-labelledby="pulsa-title">
+      <div class="container">
+        <h1 class="section-title" id="pulsa-title">Isi Pulsa & Paket Data</h1>
+        <p class="section-subtitle">Pilih provider dan nominal sesuai kebutuhan</p>
+
+        <div class="card">
+          <h3 style="font-weight:700;font-size:1rem;margin-bottom:14px;">Pilih Provider</h3>
+          <div class="provider-grid" id="provider-grid" role="radiogroup" aria-label="Pilih provider">
+            <!-- Dirender JS -->
+          </div>
+
+          <div class="form-group">
+            <label for="input-phone">Nomor Handphone</label>
+            <input type="tel" class="form-control" id="input-phone" placeholder="08xxxxxxxxxx" maxlength="13"
+              aria-describedby="phone-error" oninput="onPhoneInput(this)" />
+            <div class="field-error" id="phone-error" role="alert"></div>
+            <div class="provider-detected" id="provider-detected">
+              <i class="fas fa-check-circle"></i> <span id="provider-detected-name"></span>
+            </div>
+          </div>
+
+          <div class="type-tabs" role="tablist">
+            <button class="type-tab active" id="pulsa-tab-pulsa" onclick="switchPulsaType('pulsa')"
+              role="tab">Pulsa</button>
+            <button class="type-tab" id="pulsa-tab-data" onclick="switchPulsaType('data')" role="tab">Paket
+              Data</button>
+          </div>
+
+          <div id="pulsa-nominal-panel">
+            <div class="nominal-grid" id="pulsa-grid" role="radiogroup" aria-label="Pilih nominal pulsa"></div>
+            <div class="form-group" style="margin-top:4px;">
+              <label for="pulsa-custom">Nominal Lain (Custom)</label>
+              <input type="number" class="form-control" id="pulsa-custom" placeholder="Masukkan nominal (min Rp 5.000)"
+                min="5000" step="1000" />
+            </div>
+          </div>
+
+          <div id="pulsa-data-panel" style="display:none;">
+            <div class="nominal-grid" id="data-grid" role="radiogroup" aria-label="Pilih paket data"></div>
+          </div>
+
+          <button class="btn btn-primary btn-full" id="btn-cek-pulsa" onclick="previewPulsa()" style="margin-top:8px;">
+            <i class="fas fa-eye"></i> Preview & Bayar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+     SECTION 5: RIWAYAT TRANSAKSI
+     ========================================== -->
+    <section id="section-riwayat" class="section" aria-labelledby="riwayat-title">
+      <div class="container">
+        <h1 class="section-title" id="riwayat-title">Riwayat Transaksi</h1>
+        <p class="section-subtitle">Semua riwayat pembayaran Anda tersimpan di sini</p>
+
+        <div class="card" style="padding:16px 20px;margin-bottom:16px;">
+          <div class="filter-row">
+            <select id="filter-kategori" onchange="renderHistory()" aria-label="Filter kategori">
+              <option value="">Semua Kategori</option>
+              <option value="PLN">Listrik PLN</option>
+              <option value="PDAM">PDAM</option>
+              <option value="Internet">Internet</option>
+              <option value="Seminar">Seminar</option>
+              <option value="SPP">Biaya Kuliah</option>
+              <option value="Pulsa">Pulsa/Data</option>
+            </select>
+            <select id="filter-status" onchange="renderHistory()" aria-label="Filter status">
+              <option value="">Semua Status</option>
+              <option value="Sukses">Sukses</option>
+              <option value="Pending">Pending</option>
+              <option value="Gagal">Gagal</option>
+            </select>
+            <button class="btn btn-danger btn-sm" onclick="konfirmasiHapusRiwayat()" id="btn-clear-history">
+              <i class="fas fa-trash"></i> Hapus Riwayat
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="exportCSV()" style="margin-left:auto;">
+              <i class="fas fa-file-export"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div class="history-table-wrap">
+            <table class="history-table" id="history-table" role="table" aria-label="Tabel riwayat transaksi">
+              <thead>
+                <tr>
+                  <th>ID Transaksi</th>
+                  <th>Waktu</th>
+                  <th>Layanan</th>
+                  <th>Keterangan</th>
+                  <th>Metode</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="history-tbody"></tbody>
+            </table>
+          </div>
+          <div id="history-empty" class="empty-state" style="display:none;">
+            <i class="fas fa-receipt"></i>
+            <p>Belum ada transaksi. Mulai bayar tagihan sekarang!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+     SECTION 6: PROFIL PENGGUNA (FAKE LOGIN)
+     ========================================== -->
+    <section id="section-profile" class="section" aria-labelledby="profile-title">
+      <div class="container" style="max-width:600px;">
+        <h1 class="section-title" id="profile-title">Profil Pengguna</h1>
+        <p class="section-subtitle">Simulasi Login Akun Demo & Manajemen Dompet</p>
+
+        <div class="card" style="text-align:center; padding:32px 24px; margin-bottom:24px; position:relative;">
+          <div id="profile-avatar"
+            style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg, var(--primary), var(--secondary));color:#fff;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;margin:0 auto 16px;box-shadow:var(--shadow);">
+            FZ
+          </div>
+          <h2 id="profile-name" style="font-size:1.4rem;font-weight:800;margin-bottom:4px;">M. Farid Zulianto</h2>
+          <p id="profile-role" style="font-size:0.88rem;color:var(--text-muted);margin-bottom:16px;"><i
+              class="fas fa-graduation-cap"></i> Mahasiswa Aktif (NIM: 221011402463)</p>
+
+          <div
+            style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <span style="font-size:0.85rem;font-weight:600;color:var(--text-muted);">Saldo Dompet BK</span>
+            <strong id="profile-balance" style="font-size:1.3rem;color:var(--primary);font-weight:800;">Rp
+              5.000.000</strong>
+          </div>
+
+          <div class="form-group" style="text-align:left;">
+            <label for="demo-user-select">Ganti Akun Demo (Simulasi Login)</label>
+            <select id="demo-user-select" class="form-control" onchange="switchDemoUser(this.value)">
+              <option value="221011402463">M. Farid Zulianto (NIM: 221011402463)</option>
+              <option value="221011402465">Nandi Mulyana (NIM: 221011402465)</option>
+              <option value="221011402467">Salsabilla (NIM: 221011402467)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card" style="padding:24px;">
+          <h3 style="font-weight:800;font-size:1.1rem;margin-bottom:16px;"><i class="fas fa-wallet"
+              style="color:var(--primary);"></i> Top Up Saldo Simulasi</h3>
+          <div class="form-group">
+            <label for="topup-amount">Nominal Top Up</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="topup-amount"
+                placeholder="Masukkan jumlah top up (min Rp 10.000)" min="10000" />
+              <button class="btn btn-primary" onclick="processTopUp()">Top Up</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+     SECTION 7: BANTUAN / FAQ
+     ========================================== -->
+    <section id="section-help" class="section" aria-labelledby="help-title">
+      <div class="container" style="max-width:800px;">
+        <h1 class="section-title" id="help-title">Pusat Bantuan & FAQ</h1>
+        <p class="section-subtitle">Temukan jawaban atas pertanyaan umum seputar simulasi BayarKita</p>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card faq-item" style="padding:20px;cursor:pointer;" onclick="toggleFaq(this)">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;">
+              <span>❓ Apa itu aplikasi BayarKita?</span>
+              <i class="fas fa-chevron-down" style="color:var(--text-muted);transition:transform 0.3s;"></i>
+            </div>
+            <div class="faq-answer"
+              style="max-height:0;overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;color:var(--text-muted);font-size:0.9rem;">
+              <p style="margin-top:12px;line-height:1.5;">BayarKita adalah aplikasi Single Page Application (SPA)
+                berbasis client-side murni yang menyajikan simulasi pembayaran tagihan multi-layanan (PLN, PDAM,
+                Internet, Seminar, dan SPP Kuliah) serta isi ulang pulsa/data dengan integrasi metode pembayaran modern
+                (Virtual Account, QRIS, Teller).</p>
+            </div>
+          </div>
+
+          <div class="card faq-item" style="padding:20px;cursor:pointer;" onclick="toggleFaq(this)">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;">
+              <span>❓ Bagaimana cara simulasi saldo bekerja?</span>
+              <i class="fas fa-chevron-down" style="color:var(--text-muted);transition:transform 0.3s;"></i>
+            </div>
+            <div class="faq-answer"
+              style="max-height:0;overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;color:var(--text-muted);font-size:0.9rem;">
+              <p style="margin-top:12px;line-height:1.5;">Setiap kali Anda pertama kali menggunakan aplikasi, Anda
+                dibekali saldo awal Rp 5.000.000. Anda dapat mengisi ulang saldo secara instan di menu Profil Pengguna.
+                Saldo akan otomatis terpotong saat transaksi berhasil.</p>
+            </div>
+          </div>
+
+          <div class="card faq-item" style="padding:20px;cursor:pointer;" onclick="toggleFaq(this)">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;">
+              <span>❓ Apakah bukti struk digital valid?</span>
+              <i class="fas fa-chevron-down" style="color:var(--text-muted);transition:transform 0.3s;"></i>
+            </div>
+            <div class="faq-answer"
+              style="max-height:0;overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;color:var(--text-muted);font-size:0.9rem;">
+              <p style="margin-top:12px;line-height:1.5;">Bukti transaksi yang dihasilkan berupa struk digital yang
+                dinamis. Anda dapat mencetaknya langsung melalui printer fisik (menggunakan tombol Cetak) atau
+                mengunduhnya sebagai berkas PDF yang rapi dengan mengklik tombol PDF (didukung oleh jsPDF).</p>
+            </div>
+          </div>
+
+          <div class="card faq-item" style="padding:20px;cursor:pointer;" onclick="toggleFaq(this)">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;">
+              <span>❓ Bagaimana jika waktu pembayaran QRIS habis?</span>
+              <i class="fas fa-chevron-down" style="color:var(--text-muted);transition:transform 0.3s;"></i>
+            </div>
+            <div class="faq-answer"
+              style="max-height:0;overflow:hidden;transition:max-height 0.3s ease, margin-top 0.3s ease;color:var(--text-muted);font-size:0.9rem;">
+              <p style="margin-top:12px;line-height:1.5;">Kode QRIS dibatasi masa berlakunya selama 5 menit. Jika waktu
+                habis sebelum Anda menekan tombol bayar, tombol bayar akan dinonaktifkan. Silakan cek ulang tagihan Anda
+                untuk membuat ulang kode QRIS baru.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+     MODAL: STRUK PEMBAYARAN
+     ========================================== -->
+  <div class="modal-overlay" id="modal-receipt" role="dialog" aria-modal="true" aria-labelledby="receipt-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="receipt-modal-title">Bukti Pembayaran</h2>
+        <button class="modal-close" onclick="closeModal('modal-receipt')" aria-label="Tutup">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div id="receipt-content"></div>
+      <div class="modal-footer no-print">
+        <button class="btn btn-outline btn-sm" onclick="printReceipt()" id="btn-print-receipt">
+          <i class="fas fa-print"></i> Cetak
+        </button>
+        <button class="btn btn-success btn-sm" onclick="downloadPDF()">
+          <i class="fas fa-file-pdf"></i> PDF
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="closeModal('modal-receipt');navigateTo('riwayat')">
+          <i class="fas fa-history"></i> Lihat Riwayat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI BAYAR SPP -->
+  <div class="modal-overlay" id="modal-spp-payment" role="dialog" aria-modal="true" aria-labelledby="spp-payment-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="spp-payment-title">Konfirmasi Pembayaran SPP</h2>
+        <button class="modal-close" onclick="closeModal('modal-spp-payment')" aria-label="Tutup"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <div id="spp-payment-content"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-spp-payment')">Batal</button>
+        <button class="btn btn-primary" id="btn-konfirmasi-spp" onclick="konfirmasiSPP()">
+          <i class="fas fa-lock"></i> Konfirmasi & Bayar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI HAPUS RIWAYAT -->
+  <div class="modal-overlay" id="modal-confirm-clear" role="dialog" aria-modal="true"
+    aria-labelledby="confirm-clear-title">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-header">
+        <h2 class="modal-title" id="confirm-clear-title">Hapus Riwayat</h2>
+        <button class="modal-close" onclick="closeModal('modal-confirm-clear')" aria-label="Tutup"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:4px;">Apakah Anda yakin ingin menghapus
+        <strong>semua riwayat transaksi</strong>? Tindakan ini tidak dapat dibatalkan.
+      </p>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-confirm-clear')">Batal</button>
+        <button class="btn btn-danger btn-sm" onclick="hapusRiwayat()"><i class="fas fa-trash"></i> Hapus Semua</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PREVIEW PULSA -->
+  <div class="modal-overlay" id="modal-pulsa-preview" role="dialog" aria-modal="true"
+    aria-labelledby="pulsa-preview-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="pulsa-preview-title">Preview & Konfirmasi</h2>
+        <button class="modal-close" onclick="closeModal('modal-pulsa-preview')" aria-label="Tutup"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <div id="pulsa-preview-content"></div>
+      <div id="pulsa-payment-methods" style="margin-top:16px;"></div>
+      <div id="pulsa-payment-detail-area"></div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-pulsa-preview')">Batal</button>
+        <button class="btn btn-primary" id="btn-bayar-pulsa" onclick="prosesBayarPulsa()">
+          <i class="fas fa-lock"></i> Bayar Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="utils.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
