@@ -244,14 +244,19 @@ function setButtonLoading(btn, isLoading, loadingText = 'Memproses...', original
 // =============================================
 // LOCAL STORAGE HELPERS
 // =============================================
+function getActiveNim() {
+    return typeof activeUserNim !== 'undefined' ? activeUserNim : '221011402463';
+}
+
 /**
  * Simpan transaksi ke localStorage
  * @param {Object} transaction - Data transaksi
  */
 function saveTransaction(transaction) {
+    const nim = getActiveNim();
     const transactions = getTransactions();
     transactions.unshift(transaction); // Tambah di awal
-    localStorage.setItem('bayarkita_transactions', JSON.stringify(transactions));
+    localStorage.setItem('bayarkita_transactions_' + nim, JSON.stringify(transactions));
 }
 
 /**
@@ -259,7 +264,8 @@ function saveTransaction(transaction) {
  * @returns {Array} - Array transaksi
  */
 function getTransactions() {
-    const data = localStorage.getItem('bayarkita_transactions');
+    const nim = getActiveNim();
+    const data = localStorage.getItem('bayarkita_transactions_' + nim);
     return data ? JSON.parse(data) : [];
 }
 
@@ -267,7 +273,8 @@ function getTransactions() {
  * Hapus semua transaksi dari localStorage
  */
 function clearTransactions() {
-    localStorage.removeItem('bayarkita_transactions');
+    const nim = getActiveNim();
+    localStorage.removeItem('bayarkita_transactions_' + nim);
 }
 
 /**
@@ -275,7 +282,8 @@ function clearTransactions() {
  * @param {number} balance - Saldo baru
  */
 function saveBalance(balance) {
-    localStorage.setItem('bayarkita_balance', balance.toString());
+    const nim = getActiveNim();
+    localStorage.setItem('bayarkita_balance_' + nim, balance.toString());
 }
 
 /**
@@ -283,7 +291,8 @@ function saveBalance(balance) {
  * @returns {number} - Saldo saat ini
  */
 function getBalance() {
-    const bal = localStorage.getItem('bayarkita_balance');
+    const nim = getActiveNim();
+    const bal = localStorage.getItem('bayarkita_balance_' + nim);
     return bal ? parseInt(bal) : 5000000; // Default saldo 5 juta
 }
 
