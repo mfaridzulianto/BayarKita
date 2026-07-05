@@ -392,7 +392,7 @@ function cekTagihan() {
         setButtonLoading(btn, false);
         
         // Edge Case: Cek jika tagihan umum sudah lunas
-        const paidBills = JSON.parse(localStorage.getItem('bayarkita_paid_bills') || '[]');
+        const paidBills = JSON.parse(localStorage.getItem('bayarkita_paid_bills_' + activeUserNim) || '[]');
         const billKey = `${currentCategory}_${value}`;
         if (paidBills.includes(billKey)) {
             input.classList.add('error');
@@ -686,10 +686,10 @@ function prosesBayar() {
         updateBalanceDisplay();
 
         // Simpan status lunas tagihan ke localStorage
-        const paidBills = JSON.parse(localStorage.getItem('bayarkita_paid_bills') || '[]');
+        const paidBills = JSON.parse(localStorage.getItem('bayarkita_paid_bills_' + activeUserNim) || '[]');
         const billKey = `${activeBill.category}_${activeBill.id}`;
         paidBills.push(billKey);
-        localStorage.setItem('bayarkita_paid_bills', JSON.stringify(paidBills));
+        localStorage.setItem('bayarkita_paid_bills_' + activeUserNim, JSON.stringify(paidBills));
 
         // Buat data transaksi
         const trxId = generateTransactionId();
@@ -788,7 +788,6 @@ function cekSPP() {
         const selectEl = document.getElementById('spp-semester-select');
         if (selectEl) selectEl.value = '';
         selectedSppSemester = '';
-        sppSemesterCache = {};
 
         activeSppBills = student.bills;
 
@@ -845,7 +844,6 @@ function cekBillCode() {
         const selectEl = document.getElementById('spp-semester-select');
         if (selectEl) selectEl.value = '';
         selectedSppSemester = '';
-        sppSemesterCache = {};
 
         // Saring tagihan khusus yang sesuai dengan billId
         activeSppBills = student.bills.filter(b => b.id === billInfo.billId);
@@ -936,9 +934,11 @@ function handleSemesterFilter(value) {
     
     selectedSppSemester = value;
 
+    const cacheKey = `${activeSppNim}_${value}`;
+
     // Check if we have this semester cached
-    if (sppSemesterCache[value]) {
-        activeSppBills = sppSemesterCache[value];
+    if (sppSemesterCache[cacheKey]) {
+        activeSppBills = sppSemesterCache[cacheKey];
     } else {
         // Ganjil 2025/2026 is the active semester of the student
         if (value === '20251' || value === '') {
@@ -958,7 +958,7 @@ function handleSemesterFilter(value) {
                     payMerchant: 'Bank MANDIRI'
                 };
             });
-            sppSemesterCache[value] = generated;
+            sppSemesterCache[cacheKey] = generated;
             activeSppBills = generated;
         } else {
             // Future Semesters: all bills are unpaid
@@ -969,7 +969,7 @@ function handleSemesterFilter(value) {
                 payChannel: '-',
                 payMerchant: '-'
             }));
-            sppSemesterCache[value] = generated;
+            sppSemesterCache[cacheKey] = generated;
             activeSppBills = generated;
         }
     }
@@ -1486,7 +1486,7 @@ function konfirmasiHapusRiwayat() {
 
 function hapusRiwayat() {
     clearTransactions();
-    localStorage.removeItem('bayarkita_paid_bills'); // Reset status lunas tagihan umum
+    localStorage.removeItem('bayarkita_paid_bills_' + activeUserNim); // Reset status lunas tagihan umum
     
     // Reset status SPP ke kondisi awal simulasi
     if (typeof sppData !== 'undefined') {
@@ -1848,12 +1848,21 @@ function downloadPDF() {
 // =============================================
 function openModal(id) {
     const modal = document.getElementById(id);
-    if (modal) modal.classList.add('show');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.classList.add('modal-open');
+    }
 }
 
 function closeModal(id) {
     const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('show');
+    if (modal) {
+        modal.classList.remove('show');
+        const openModals = document.querySelectorAll('.modal-overlay.show');
+        if (openModals.length === 0) {
+            document.body.classList.remove('modal-open');
+        }
+    }
     
     // Clear countdown interval if closing payment modal
     if (id === 'modal-receipt' || id === 'modal-pulsa-preview') {
@@ -1874,6 +1883,16 @@ window.addEventListener('click', (e) => {
 function switchDemoUser(nim) {
     if (!demoUsers[nim]) return;
     activeUserNim = nim;
+    
+    // Refresh all views and states for the new user
+    updateBalanceDisplay();
+    updateDashboardStats();
+    renderRecentTransactions();
+    renderHistory();
+
+    // Reset SPP result view so it doesn't show the previous user's SPP details
+    const sppResult = document.getElementById('spp-result');
+    if (sppResult) sppResult.style.display = 'none';
     
     // Update profile view
     updateProfileView();
