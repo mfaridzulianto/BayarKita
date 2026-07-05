@@ -338,13 +338,7 @@ select.form-control {
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ===== PRINT ===== */
-@media print {
-  .navbar, .navbar-nav, .navbar-actions, #toast-container, .modal-footer, .btn-print, .no-print { display: none !important; }
-  .modal-overlay { position: static; background: none; display: block; }
-  .modal { box-shadow: none; max-height: none; }
-  body { background: #fff; }
-}
+/* ===== PRINT (Consolidated below) ===== */
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
@@ -401,13 +395,52 @@ select.form-control {
 
 /* ===== PRINT STYLES ===== */
 @media print {
+  /* Redefine CSS variables for printing to get clean light-mode prints for both themes */
+  body, body.dark-mode {
+    --bg: #ffffff !important;
+    --card: #ffffff !important;
+    --text: #111827 !important;
+    --text-muted: #6B7280 !important;
+    --border: #E5E7EB !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
   body * {
     visibility: hidden;
   }
-  #section-spp, #section-spp * {
+
+  /* 1. When a modal (like the receipt modal) is open, print ONLY the receipt modal */
+  body.modal-open #modal-receipt,
+  body.modal-open #modal-receipt * {
+    visibility: visible !important;
+  }
+  body.modal-open #modal-receipt {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.modal-open #modal-receipt .modal {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* 2. When no modal is open, print the SPP section */
+  body:not(.modal-open) #section-spp,
+  body:not(.modal-open) #section-spp * {
     visibility: visible;
   }
-  #section-spp {
+  body:not(.modal-open) #section-spp {
     position: absolute;
     left: 0;
     top: 0;
@@ -415,25 +448,25 @@ select.form-control {
     margin: 0;
     padding: 0;
   }
+
+  /* Hide print-irrelevant elements */
   .no-print, .no-print * {
     display: none !important;
   }
-  /* hide search elements during print */
-  #spp-nim-panel, #spp-code-panel, .type-tabs, .section-title, .section-subtitle {
+  
+  /* hide search/nav elements during print */
+  #spp-nim-panel, #spp-code-panel, .type-tabs, .section-title, .section-subtitle, .navbar, .navbar-nav, .navbar-actions, #toast-container, .modal-footer {
     display: none !important;
   }
   .spp-summary {
     display: none !important;
   }
+
   /* Clean design elements for printing */
   .card {
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
-  }
-  body.dark-mode {
-    background: #ffffff !important;
-    color: #1a1a2e !important;
   }
 }
